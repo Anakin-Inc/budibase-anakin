@@ -1,0 +1,13 @@
+{
+  "name": "budibase-datasource-anakin",
+  "version": "1.0.0",
+  "description": "Web scraping, AI search, and agentic research for Budibase",
+  "main": "src/index.ts",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@budibase/types": "^3.40.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

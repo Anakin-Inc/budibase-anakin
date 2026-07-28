@@ -1,0 +1,55 @@
+{
+  "type": "datasource",
+  "metadata": {},
+  "schema": {
+    "docs": "https://anakin.io/docs/api-reference",
+    "friendlyName": "Anakin",
+    "type": "API",
+    "description": "Web scraping, AI search, and multi-stage agentic research",
+    "datasource": {
+      "apiKey": {
+        "type": "password",
+        "required": true
+      }
+    },
+    "query": {
+      "scrapeUrl": {
+        "type": "fields",
+        "fields": {
+          "url": { "display": "URL", "type": "string", "required": true },
+          "generateJson": { "display": "Generate JSON", "type": "boolean", "required": false },
+          "country": { "display": "Country", "type": "string", "required": false },
+          "useBrowser": { "display": "Use browser", "type": "boolean", "required": false },
+          "forceFresh": { "display": "Force fresh", "type": "boolean", "required": false }
+        }
+      },
+      "getScrapeResult": {
+        "type": "fields",
+        "fields": {
+          "jobId": { "display": "Job ID", "type": "string", "required": true }
+        }
+      },
+      "search": {
+        "type": "fields",
+        "fields": {
+          "prompt": { "display": "Search query", "type": "string", "required": true },
+          "limit": { "display": "Max results", "type": "number", "required": false }
+        }
+      },
+      "agenticSearch": {
+        "type": "fields",
+        "fields": {
+          "prompt": { "display": "Research prompt", "type": "string", "required": true },
+          "useBrowser": { "display": "Use browser", "type": "boolean", "required": false },
+          "schema": { "display": "Result schema (JSON)", "type": "json", "required": false }
+        }
+      },
+      "getAgenticSearchResult": {
+        "type": "fields",
+        "fields": {
+          "jobId": { "display": "Job ID", "type": "string", "required": true }
+        }
+      }
+    }
+  }
+}
