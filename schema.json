@@ -5,7 +5,7 @@
     "docs": "https://anakin.io/docs/api-reference",
     "friendlyName": "Anakin",
     "type": "API",
-    "description": "Web scraping, AI search, and multi-stage agentic research",
+    "description": "Web scraping, site mapping/crawling, AI search, agentic research, Wire site automation, website monitoring, AI-visibility tracking, and AI browser tasks",
     "datasource": {
       "apiKey": {
         "type": "password",
@@ -24,6 +24,45 @@
         }
       },
       "getScrapeResult": {
+        "type": "fields",
+        "fields": {
+          "jobId": { "display": "Job ID", "type": "string", "required": true }
+        }
+      },
+      "map": {
+        "type": "fields",
+        "fields": {
+          "url": { "display": "Starting URL", "type": "string", "required": true },
+          "limit": { "display": "Max URLs (1-1000, default 100)", "type": "number", "required": false },
+          "depth": { "display": "Link-hop depth (1-5, default 2)", "type": "number", "required": false },
+          "limitPerLevel": { "display": "Max URLs per depth level (default 100)", "type": "number", "required": false },
+          "includeSubdomains": { "display": "Include subdomains", "type": "boolean", "required": false },
+          "includeExternalLinks": { "display": "Include external links", "type": "boolean", "required": false },
+          "useBrowser": { "display": "Use browser (for SPAs)", "type": "boolean", "required": false },
+          "search": { "display": "Keyword filter", "type": "string", "required": false }
+        }
+      },
+      "getMapResult": {
+        "type": "fields",
+        "fields": {
+          "jobId": { "display": "Job ID", "type": "string", "required": true }
+        }
+      },
+      "crawl": {
+        "type": "fields",
+        "fields": {
+          "url": { "display": "Starting URL", "type": "string", "required": true },
+          "maxPages": { "display": "Max pages (1-500, default 10)", "type": "number", "required": false },
+          "depth": { "display": "Link-hop depth (1-5, default 1)", "type": "number", "required": false },
+          "country": { "display": "Country", "type": "string", "required": false },
+          "useBrowser": { "display": "Use browser (for SPAs)", "type": "boolean", "required": false },
+          "includePatterns": { "display": "Include URL patterns (comma-separated)", "type": "string", "required": false },
+          "excludePatterns": { "display": "Exclude URL patterns (comma-separated)", "type": "string", "required": false },
+          "sessionId": { "display": "Saved session ID", "type": "string", "required": false },
+          "sessionName": { "display": "Saved session name", "type": "string", "required": false }
+        }
+      },
+      "getCrawlResult": {
         "type": "fields",
         "fields": {
           "jobId": { "display": "Job ID", "type": "string", "required": true }
@@ -48,6 +87,164 @@
         "type": "fields",
         "fields": {
           "jobId": { "display": "Job ID", "type": "string", "required": true }
+        }
+      },
+      "wireDiscover": {
+        "type": "fields",
+        "fields": {
+          "q": { "display": "Intent (natural language)", "type": "string", "required": true },
+          "limit": { "display": "Max candidate actions (default 5)", "type": "number", "required": false }
+        }
+      },
+      "wireCatalog": {
+        "type": "fields",
+        "fields": {
+          "slug": { "display": "Catalog slug (e.g. walmart) — omit to list all", "type": "string", "required": false }
+        }
+      },
+      "wireReadAction": {
+        "type": "fields",
+        "fields": {
+          "actionId": { "display": "Action ID (from wireDiscover/wireCatalog)", "type": "string", "required": true },
+          "params": { "display": "Action parameters (JSON)", "type": "json", "required": false },
+          "credentialId": { "display": "Credential ID", "type": "string", "required": false },
+          "identityId": { "display": "Identity ID", "type": "string", "required": false }
+        }
+      },
+      "wireWriteAction": {
+        "type": "fields",
+        "fields": {
+          "actionId": { "display": "Action ID (from wireDiscover/wireCatalog)", "type": "string", "required": true },
+          "params": { "display": "Action parameters (JSON)", "type": "json", "required": false },
+          "credentialId": { "display": "Credential ID", "type": "string", "required": false },
+          "identityId": { "display": "Identity ID", "type": "string", "required": false }
+        }
+      },
+      "getWireJobResult": {
+        "type": "fields",
+        "fields": {
+          "jobId": { "display": "Job ID", "type": "string", "required": true }
+        }
+      },
+      "wireIdentities": {
+        "type": "fields",
+        "fields": {
+          "catalogId": { "display": "Catalog ID (filter)", "type": "string", "required": false }
+        }
+      },
+      "wireLogin": {
+        "type": "fields",
+        "fields": {
+          "catalogSlug": { "display": "Catalog slug (e.g. neb)", "type": "string", "required": true },
+          "params": { "display": "Login fields (JSON, e.g. email/password)", "type": "json", "required": false },
+          "identityName": { "display": "Identity name", "type": "string", "required": false },
+          "sourceId": { "display": "1Password identity-source ID", "type": "string", "required": false },
+          "sourceRef": { "display": "1Password item locator (JSON)", "type": "json", "required": false }
+        }
+      },
+      "wireBuild": {
+        "type": "fields",
+        "fields": {
+          "websiteUrl": { "display": "Website URL", "type": "string", "required": true },
+          "goal": { "display": "Goal (what the action should do/extract)", "type": "string", "required": true },
+          "catalogId": { "display": "Existing catalog ID", "type": "string", "required": false },
+          "visibility": { "display": "Visibility (private or public, default private)", "type": "string", "required": false },
+          "force": { "display": "Build even if similar actions exist", "type": "boolean", "required": false }
+        }
+      },
+      "monitorCreate": {
+        "type": "fields",
+        "fields": {
+          "url": { "display": "URL to watch", "type": "string", "required": true },
+          "intervalMinutes": { "display": "Check interval in minutes (min 15)", "type": "number", "required": true },
+          "scope": { "display": "Scope (page, site, or wire — default page)", "type": "string", "required": false },
+          "watchMode": { "display": "Watch mode (full_page or specific_data — default full_page)", "type": "string", "required": false },
+          "watchFormat": { "display": "Watch format (markdown, html, cleaned_html — default markdown)", "type": "string", "required": false },
+          "outputSchema": { "display": "Fields to track for specific_data mode (JSON Schema)", "type": "json", "required": false },
+          "aiMode": { "display": "AI meaningful-change filtering (+1 credit/check)", "type": "boolean", "required": false },
+          "aiGoal": { "display": "What counts as a meaningful change (used with aiMode)", "type": "string", "required": false },
+          "useBrowser": { "display": "Use stealth browser for checks", "type": "boolean", "required": false },
+          "country": { "display": "Country (default us)", "type": "string", "required": false },
+          "sessionId": { "display": "Saved session ID (for login-protected pages)", "type": "string", "required": false },
+          "isActive": { "display": "Start running immediately (default true)", "type": "boolean", "required": false },
+          "expiresAt": { "display": "Expiry date (ISO 8601 or YYYY-MM-DD)", "type": "string", "required": false },
+          "alertWebhookUrl": { "display": "Alert webhook URL", "type": "string", "required": false },
+          "alertEmails": { "display": "Alert email recipients (comma-separated)", "type": "string", "required": false },
+          "maxPages": { "display": "Site scope: max pages per run", "type": "number", "required": false },
+          "maxDepth": { "display": "Site scope: crawl depth (1-5, default 2)", "type": "number", "required": false },
+          "includePatterns": { "display": "Site scope: URL patterns to track (comma-separated)", "type": "string", "required": false },
+          "excludePatterns": { "display": "Site scope: URL patterns to skip (comma-separated)", "type": "string", "required": false },
+          "wireActionId": { "display": "Wire scope: action ID to run each check", "type": "string", "required": false },
+          "wireCatalogSlug": { "display": "Wire scope: catalog slug", "type": "string", "required": false },
+          "wireCredentialId": { "display": "Wire scope: credential ID (if auth required)", "type": "string", "required": false },
+          "wireParams": { "display": "Wire scope: action parameters (JSON)", "type": "json", "required": false },
+          "wireWatchPaths": { "display": "Wire scope: JSON paths to diff (comma-separated)", "type": "string", "required": false }
+        }
+      },
+      "monitorList": {
+        "type": "fields",
+        "fields": {
+          "id": { "display": "Monitor ID (omit to list all)", "type": "string", "required": false }
+        }
+      },
+      "monitorChanges": {
+        "type": "fields",
+        "fields": {
+          "id": { "display": "Monitor ID", "type": "string", "required": true }
+        }
+      },
+      "monitorControl": {
+        "type": "fields",
+        "fields": {
+          "id": { "display": "Monitor ID", "type": "string", "required": true },
+          "action": { "display": "Action (pause, resume, run_now, or delete)", "type": "string", "required": true }
+        }
+      },
+      "aiVisibilitySearch": {
+        "type": "fields",
+        "fields": {
+          "query": { "display": "Question (max 2000 characters)", "type": "string", "required": true },
+          "sources": { "display": "Engine slugs to query (comma-separated, omit for all)", "type": "string", "required": false },
+          "country": { "display": "Search geography country (default us)", "type": "string", "required": false }
+        }
+      },
+      "getAiVisibilitySearchResult": {
+        "type": "fields",
+        "fields": {
+          "searchId": { "display": "Search ID", "type": "string", "required": true }
+        }
+      },
+      "aiVisibilitySources": {
+        "type": "fields",
+        "fields": {}
+      },
+      "sessionList": {
+        "type": "fields",
+        "fields": {
+          "domain": { "display": "Filter by domain (e.g. amazon.com)", "type": "string", "required": false }
+        }
+      },
+      "sessionDelete": {
+        "type": "fields",
+        "fields": {
+          "id": { "display": "Session ID", "type": "string", "required": true }
+        }
+      },
+      "browserTask": {
+        "type": "fields",
+        "fields": {
+          "prompt": { "display": "Task (natural language — never include passwords)", "type": "string", "required": true },
+          "url": { "display": "Navigate here before starting", "type": "string", "required": false },
+          "sessionId": { "display": "Saved session ID (for authenticated tasks)", "type": "string", "required": false },
+          "maxSteps": { "display": "Max agent steps", "type": "number", "required": false },
+          "timeoutMs": { "display": "Timeout (ms, server caps at ~330s)", "type": "number", "required": false },
+          "outputSchema": { "display": "Structured result schema (JSON Schema)", "type": "json", "required": false }
+        }
+      },
+      "getBrowserTaskResult": {
+        "type": "fields",
+        "fields": {
+          "jobId": { "display": "Job ID (workflow_id from browserTask)", "type": "string", "required": true }
         }
       }
     }
