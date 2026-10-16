@@ -11,11 +11,25 @@ as Budibase queries.
 
 ## Install
 
-1. In a self-hosted Budibase instance, go to **Settings → Plugins → Add
-   plugin** and point it at this repo (or a built release of it).
-2. Add a new datasource, choose **Anakin**, and supply your API key
-   ([anakin.io](https://anakin.io) → API keys). "Test Connection" runs a
-   1-result `search` query (3 credits) to validate the key.
+1. In a self-hosted Budibase instance, open **Settings → Plugins → Add
+   plugin**, choose **GitHub**, and enter
+   `https://github.com/Anakin-Inc/budibase-anakin`. Budibase downloads the
+   `.tar.gz` from the latest release. (You can also download that file from
+   the [releases page](https://github.com/Anakin-Inc/budibase-anakin/releases)
+   and use **Upload**.)
+2. Add a new datasource, choose **Anakin**, and paste your API key (create
+   one at [anakin.io](https://anakin.io); the free tier includes credits).
+   **Test Connection** lists your saved browser sessions to check the key,
+   which costs no credits.
+
+## Input types
+
+Budibase passes bound query values as strings. The plugin converts each
+field to the type listed in `schema.json` before calling the API: numbers
+(`"25"` → `25`), booleans (`"true"` / `"false"`), and JSON fields such as
+`params`, `schema` and `outputSchema` (parsed from a JSON string). Blank
+optional fields are treated as unset, so the API default applies. An
+invalid value fails the query with the field name in the error.
 
 ## Authentication
 
@@ -160,15 +174,17 @@ Anakin dashboard; this plugin only lists and deletes them.
   with a mode flag) so the split between safe reads and state-changing
   writes stays visible in the query picker.
 
-## Verified
-
-Installed and typechecked against the real published `@budibase/types`:
+## Development
 
 ```
 npm install
-npx tsc --noEmit
+npm run typecheck
+npm test        # builds dist/ and runs the request-shape tests
 ```
 
-Not bundled (no rollup config) and not run inside an actual Budibase
-instance — see `SUBMIT.md` for what's left before this can be published to
-`Budibase/plugins`.
+`npm run build` writes `dist/plugin.min.js`, `dist/schema.json` (with the
+bundle hash and version Budibase checks) and the installable
+`dist/budibase-datasource-anakin-<version>.tar.gz`. Pushing to `main`
+publishes that tarball as a GitHub release (`.github/workflows/release.yml`),
+which is what the GitHub install option in Budibase picks up. Bump
+`version` in `package.json` for each release.

@@ -1,4 +1,6 @@
 import { ConnectionInfo, IntegrationBase } from "@budibase/types"
+// @ts-ignore
+import schema from "../schema.json"
 
 const BASE_URL = "https://api.anakin.io/v1"
 
@@ -545,17 +547,71 @@ class AnakinIntegration implements IntegrationBase {
     return await this.request(`/ai/jobs/${encodeURIComponent(query.jobId)}`, { method: "GET" })
   }
 
-  // No free/no-credit endpoint exists to test against without spending
-  // credits — same reasoning as every other integration built in this
-  // session (Botpress, Activepieces, ToolJet). A minimal real call: search
-  // with limit 1 (3 credits).
+  // GET /sessions is an authenticated read that costs no credits, so the
+  // "Test Connection" button validates the key (401 on a bad one) without
+  // spending anything.
   async testConnection(): Promise<ConnectionInfo> {
     try {
-      await this.request("/search", { method: "POST", body: { prompt: "anakin api key validation", limit: 1 } })
+      await this.request("/sessions", { method: "GET" })
       return { connected: true }
     } catch (e) {
       return { connected: false, error: e instanceof Error ? e.message : String(e) }
     }
+  }
+}
+
+/** Coerce one raw query-field value to the type schema.json declares.
+ * Budibase hands a plugin its query fields after handlebars enrichment, so
+ * anything bound from the UI arrives as a string ("10", "true", '{"a":1}'),
+ * blank optional inputs arrive as "", and only fields literally named
+ * `json` / `customData` / `requestBody` get JSON-parsed by Budibase itself. */
+function coerceField(type: string, value: unknown): unknown {
+  if (value === null || value === undefined) return undefined
+  if (typeof value === "string" && value.trim() === "") return undefined
+  if (typeof value !== "string") return value
+  switch (type) {
+    case "number": {
+      const n = Number(value)
+      if (Number.isNaN(n)) throw new Error(`Expected a number, got '${value}'`)
+      return n
+    }
+    case "boolean":
+      if (value === "true") return true
+      if (value === "false") return false
+      throw new Error(`Expected true or false, got '${value}'`)
+    case "json":
+      try {
+        return JSON.parse(value)
+      } catch {
+        throw new Error(`Expected valid JSON, got '${value}'`)
+      }
+    default:
+      return value
+  }
+}
+
+// Wrap every query method so it receives typed inputs. Budibase dispatches
+// by method name (queryVerb === schema.json query key), so wrapping the
+// prototype methods keeps that contract.
+type QueryDefinition = { fields?: Record<string, { type: string }> }
+const queries = (schema as { schema: { query: Record<string, QueryDefinition> } }).schema.query
+const proto = AnakinIntegration.prototype as unknown as Record<string, unknown>
+for (const [name, definition] of Object.entries(queries)) {
+  const method = proto[name]
+  if (typeof method !== "function") {
+    throw new Error(`schema.json query '${name}' has no matching method`)
+  }
+  const fields = definition.fields ?? {}
+  proto[name] = async function (this: AnakinIntegration, query: Record<string, unknown> = {}, ...rest: unknown[]) {
+    const typed: Record<string, unknown> = { ...query }
+    for (const [field, { type }] of Object.entries(fields)) {
+      try {
+        typed[field] = coerceField(type, query[field])
+      } catch (e) {
+        throw new Error(`Field '${field}': ${(e as Error).message}`)
+      }
+    }
+    return method.call(this, typed, ...rest)
   }
 }
 
